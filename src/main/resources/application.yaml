@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: ai-code-mother
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+
+# springdoc-openapi项目配置
+springdoc:
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: org.example.aicodemother.controller
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
