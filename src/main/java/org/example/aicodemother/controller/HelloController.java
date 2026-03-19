@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/hello")
 public class HelloController {
 
-    @GetMapping
-    public BaseResponse<String> hello() {
+    @GetMapping public BaseResponse<String> hello() {
         return ResultUtils.success("hello");
     }
 }
