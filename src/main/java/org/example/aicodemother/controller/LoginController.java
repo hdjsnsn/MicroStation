@@ -9,12 +9,9 @@ import org.example.aicodemother.model.dto.login.UserLoginRequest;
 import org.example.aicodemother.model.dto.login.UserRegisterRequest;
 import org.example.aicodemother.model.entity.UserEntity;
 import org.example.aicodemother.model.vo.login.LoginUserVO;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.example.aicodemother.service.LoginService;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 用户登录 controller
@@ -22,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author cmh
  */
 @RestController
+@RequestMapping("/login")
 public class LoginController {
 
     @Autowired
