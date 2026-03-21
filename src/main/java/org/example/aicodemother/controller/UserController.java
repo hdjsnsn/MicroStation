@@ -1,6 +1,7 @@
 package org.example.aicodemother.controller;
 
 import com.mybatisflex.core.paginate.Page;
+import jakarta.servlet.http.HttpServletRequest;
 import org.example.aicodemother.annotation.AuthCheck;
 import org.example.aicodemother.common.BaseResponse;
 import org.example.aicodemother.common.DeleteRequest;
@@ -90,9 +91,9 @@ public class UserController {
      */
     @PostMapping("/list/page/vo")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Page<UserVO>> listUserVOByPage(@RequestBody UserQueryRequest userQueryRequest) {
+    public BaseResponse<Page<UserVO>> listUserVOByPage(@RequestBody UserQueryRequest userQueryRequest, HttpServletRequest httpServletRequest) {
         ThrowUtils.throwIf(userQueryRequest == null, ErrorCode.PARAMS_ERROR);
-        Page<UserVO> result = userService.listUserVOByPage(userQueryRequest);
+        Page<UserVO> result = userService.listUserVOByPage(userQueryRequest,httpServletRequest);
         return ResultUtils.success(result);
     }
 

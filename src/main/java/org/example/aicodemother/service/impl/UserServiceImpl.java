@@ -7,6 +7,7 @@ import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.util.UpdateEntity;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
 import org.example.aicodemother.common.DeleteRequest;
 import org.example.aicodemother.exception.BusinessException;
 import org.example.aicodemother.exception.ErrorCode;
@@ -24,7 +25,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static org.example.aicodemother.constant.UserConstant.USER_LOGIN_STATE;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> implements UserService {
@@ -108,18 +112,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     }
 
     @Override
-    public Page<UserVO> listUserVOByPage(UserQueryRequest userQueryRequest) {
+    public Page<UserVO> listUserVOByPage(UserQueryRequest userQueryRequest, HttpServletRequest httpServletRequest) {
+        // 获取当前登录用户的ID
+        Object userObj = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
+        UserEntity currentUser = (UserEntity) userObj;
+
         long pageNum = userQueryRequest.getPageNum();
         long pageSize = userQueryRequest.getPageSize();
         Page<UserEntity> userPage = this.page(Page.of(pageNum, pageSize),
                 this.getQueryWrapper(userQueryRequest));
         // 数据脱敏
         Page<UserVO> userVOPage = new Page<>(pageNum, pageSize, userPage.getTotalRow());
-        List<UserVO> userVOList = this.getUserVOList(userPage.getRecords());
+        List<UserVO> userVOList = this.getUserVOList(userPage.getRecords(),currentUser.getId());
         userVOPage.setRecords(userVOList);
         return userVOPage;
     }
-
 
     /**
      * 根据查询条件构造数据查询参数
@@ -167,11 +174,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
      * @param userEntityList 用户列表
      * @return 自定义工具栏…
      */
-    public List<UserVO> getUserVOList(List<UserEntity> userEntityList) {
+    public List<UserVO> getUserVOList(List<UserEntity> userEntityList,Long userId) {
         if (CollUtil.isEmpty(userEntityList)) {
             return new ArrayList<>();
         }
         return userEntityList.stream()
+                .filter(userEntity -> !Objects.equals(userEntity.getId(), userId))
                 .map(this::getUserVO)
                 .collect(Collectors.toList());
     }

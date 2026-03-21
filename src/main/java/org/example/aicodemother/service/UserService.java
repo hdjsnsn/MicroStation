@@ -2,6 +2,7 @@ package org.example.aicodemother.service;
 
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.service.IService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.example.aicodemother.common.DeleteRequest;
 import org.example.aicodemother.model.dto.user.UserAddRequest;
 import org.example.aicodemother.model.dto.user.UserQueryRequest;
@@ -39,5 +40,5 @@ public interface UserService extends IService<UserEntity> {
     /**
      * 分页获取用户封装列表（仅管理员）
      */
-    Page<UserVO> listUserVOByPage(UserQueryRequest userQueryRequest);
+    Page<UserVO> listUserVOByPage(UserQueryRequest userQueryRequest, HttpServletRequest httpServletRequest);
 }
