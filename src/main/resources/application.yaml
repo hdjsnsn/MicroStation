@@ -1,6 +1,11 @@
 spring:
   application:
     name: ai-code-mother
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.50.180:3306/ai_code_mother
+    username: root
+    password: 123456
 server:
   port: 8080
   servlet:
