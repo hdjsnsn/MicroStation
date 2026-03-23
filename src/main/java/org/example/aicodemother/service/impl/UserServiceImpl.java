@@ -82,7 +82,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     }
 
     @Override
-    public Boolean deleteUser(DeleteRequest deleteRequest) {
+    public Boolean deleteUser(DeleteRequest deleteRequest, HttpServletRequest httpServletRequest) {
+        // 获取当前登录用户的ID
+        Object userObj = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
+        UserEntity currentUser = (UserEntity) userObj;
+
+        if (Objects.equals(currentUser.getId(), deleteRequest.getId())) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,"无法删除正在登录的用户");
+        }
+
         QueryWrapper queryWrapper = new QueryWrapper();
         queryWrapper.eq("id", deleteRequest.getId());
         queryWrapper.eq("isDelete", 0);
@@ -112,10 +120,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     }
 
     @Override
-    public Page<UserVO> listUserVOByPage(UserQueryRequest userQueryRequest, HttpServletRequest httpServletRequest) {
-        // 获取当前登录用户的ID
-        Object userObj = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
-        UserEntity currentUser = (UserEntity) userObj;
+    public Page<UserVO> listUserVOByPage(UserQueryRequest userQueryRequest) {
+
 
         long pageNum = userQueryRequest.getPageNum();
         long pageSize = userQueryRequest.getPageSize();
@@ -123,7 +129,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
                 this.getQueryWrapper(userQueryRequest));
         // 数据脱敏
         Page<UserVO> userVOPage = new Page<>(pageNum, pageSize, userPage.getTotalRow());
-        List<UserVO> userVOList = this.getUserVOList(userPage.getRecords(),currentUser.getId());
+        List<UserVO> userVOList = this.getUserVOList(userPage.getRecords());
         userVOPage.setRecords(userVOList);
         return userVOPage;
     }
@@ -174,12 +180,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
      * @param userEntityList 用户列表
      * @return 自定义工具栏…
      */
-    public List<UserVO> getUserVOList(List<UserEntity> userEntityList,Long userId) {
+    public List<UserVO> getUserVOList(List<UserEntity> userEntityList) {
         if (CollUtil.isEmpty(userEntityList)) {
             return new ArrayList<>();
         }
         return userEntityList.stream()
-                .filter(userEntity -> !Objects.equals(userEntity.getId(), userId))
                 .map(this::getUserVO)
                 .collect(Collectors.toList());
     }

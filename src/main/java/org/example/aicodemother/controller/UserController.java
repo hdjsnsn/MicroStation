@@ -63,11 +63,11 @@ public class UserController {
      */
     @PostMapping("/delete")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> deleteUser(@RequestBody DeleteRequest deleteRequest) {
+    public BaseResponse<Boolean> deleteUser(@RequestBody DeleteRequest deleteRequest, HttpServletRequest httpServletRequest) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        Boolean b = userService.deleteUser(deleteRequest);
+        Boolean b = userService.deleteUser(deleteRequest,httpServletRequest);
         return ResultUtils.success(b);
     }
 
@@ -91,9 +91,9 @@ public class UserController {
      */
     @PostMapping("/list/page/vo")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Page<UserVO>> listUserVOByPage(@RequestBody UserQueryRequest userQueryRequest, HttpServletRequest httpServletRequest) {
+    public BaseResponse<Page<UserVO>> listUserVOByPage(@RequestBody UserQueryRequest userQueryRequest) {
         ThrowUtils.throwIf(userQueryRequest == null, ErrorCode.PARAMS_ERROR);
-        Page<UserVO> result = userService.listUserVOByPage(userQueryRequest,httpServletRequest);
+        Page<UserVO> result = userService.listUserVOByPage(userQueryRequest);
         return ResultUtils.success(result);
     }
 

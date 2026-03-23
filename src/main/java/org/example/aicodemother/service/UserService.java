@@ -30,7 +30,7 @@ public interface UserService extends IService<UserEntity> {
     /**
      * 删除用户（仅管理员）
      */
-    Boolean deleteUser(DeleteRequest deleteRequest);
+    Boolean deleteUser(DeleteRequest deleteRequest, HttpServletRequest httpServletRequest);
 
     /**
      * 更新用户（仅管理员）
@@ -40,5 +40,5 @@ public interface UserService extends IService<UserEntity> {
     /**
      * 分页获取用户封装列表（仅管理员）
      */
-    Page<UserVO> listUserVOByPage(UserQueryRequest userQueryRequest, HttpServletRequest httpServletRequest);
+    Page<UserVO> listUserVOByPage(UserQueryRequest userQueryRequest);
 }

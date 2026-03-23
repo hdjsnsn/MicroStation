@@ -1,0 +1,16 @@
+# AI
+langchain4j:
+  open-ai:
+    chat-model:
+      base-url: https://api.deepseek.com
+      api-key: <your-key>  # 填写DeepSeek的key
+      model-name: deepseek-chat
+      # 日志
+      log-requests: false
+      log-responses: false
+      # 限制最多输出的 Token 数量
+      max-tokens: 8192
+      # 要求输出是 JSON，还要求输出严格匹配你定义的 JSON Schema
+      strict-json-schema: true
+      # 只返回一个合法的 JSON 对象，不要包含任何解释性文字
+      response-format: json_object

@@ -1,5 +1,6 @@
 package org.example.aicodemother.model.dto.login;
 
+import com.mybatisflex.annotation.Column;
 import lombok.Data;
 
 import java.io.Serial;
@@ -18,6 +19,11 @@ public class UserRegisterRequest implements Serializable {
      * 账号
      */
     private String userAccount;
+
+    /**
+     * 用户昵称
+     */
+    private String userName;
 
     /**
      * 密码
