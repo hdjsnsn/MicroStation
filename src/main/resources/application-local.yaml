@@ -4,7 +4,7 @@ langchain4j:
     chat-model:
       base-url: https://api.deepseek.com
       api-key: <your-key>  # 填写DeepSeek的key
-      model-name: deepseek-chat
+      model-name: deepseek-v4-flash
       # 日志
       log-requests: false
       log-responses: false

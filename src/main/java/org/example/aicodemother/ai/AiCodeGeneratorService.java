@@ -3,6 +3,7 @@ package org.example.aicodemother.ai;
 import dev.langchain4j.service.SystemMessage;
 import org.example.aicodemother.ai.model.HtmlCodeResult;
 import org.example.aicodemother.ai.model.MultiFileCodeResult;
+import reactor.core.publisher.Flux;
 
 public interface AiCodeGeneratorService {
 
@@ -23,4 +24,22 @@ public interface AiCodeGeneratorService {
      */
     @SystemMessage(fromResource = "prompt/codegen-multi-file-system-prompt.txt")
     MultiFileCodeResult generateMultiFileCode(String userMessage);
+
+    /**
+     * 生成HTML代码 (反应式编程)
+     *
+     * @param userMessage 用户提示词
+     * @return AI的输出结果流
+     */
+    @SystemMessage(fromResource = "prompt/codegen-html-system-prompt.txt")
+    Flux<String> generateHTMLCodeStream(String userMessage);
+
+    /**
+     * 生成多文件代码 (反应式编程)
+     *
+     * @param userMessage 用户提示词
+     * @return AI的输出结果流
+     */
+    @SystemMessage(fromResource = "prompt/codegen-multi-file-system-prompt.txt")
+    Flux<String> generateMultiFileCodeStream(String userMessage);
 }
