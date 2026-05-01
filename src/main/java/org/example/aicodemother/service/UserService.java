@@ -41,4 +41,9 @@ public interface UserService extends IService<UserEntity> {
      * 分页获取用户封装列表（仅管理员）
      */
     Page<UserVO> listUserVOByPage(UserQueryRequest userQueryRequest);
+
+    /**
+     * 获取脱敏后的用户信息
+     */
+    UserVO getUserVO(UserEntity userEntity);
 }

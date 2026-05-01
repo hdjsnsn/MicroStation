@@ -149,22 +149,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
         String userRole = userQueryRequest.getUserRole();
         String sortField = userQueryRequest.getSortField();
         String sortOrder = userQueryRequest.getSortOrder();
-        return QueryWrapper.create()
-                .eq("id", id) // where id = ${id}
-                .eq("userRole", userRole) // and userRole = ${userRole}
+        QueryWrapper queryWrapper = QueryWrapper.create()
+                .eq("id", id, id != null && id > 0) // where id = ${id}
+                .eq("userRole", userRole, StrUtil.isNotBlank(userRole)) // and userRole = ${userRole}
                 .eq("isDelete", 0)
-                .like("userAccount", userAccount)
-                .like("userName", userName)
-                .like("userProfile", userProfile)
+                .like("userAccount", userAccount, StrUtil.isNotBlank(userAccount))
+                .like("userName", userName, StrUtil.isNotBlank(userName))
+                .like("userProfile", userProfile, StrUtil.isNotBlank(userProfile))
                 .orderBy(sortField, "ascend".equals(sortOrder));
+
+        if (StrUtil.isNotBlank(sortField)) {
+            queryWrapper.orderBy(sortField, "ascend".equals(sortOrder));
+        }
+
+        return queryWrapper;
     }
 
-    /**
-     * 获取脱敏后的用户信息
-     *
-     * @param userEntity 用户信息
-     * @return 脱敏后的用户信息
-     */
+    @Override
     public UserVO getUserVO(UserEntity userEntity) {
         if (userEntity == null) {
             return null;
