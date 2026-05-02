@@ -47,25 +47,59 @@ public class AppController {
     public Flux<ServerSentEvent<String>> chatToGenCode(@RequestParam String appIdStr,
                                       @RequestParam String message,
                                       HttpServletRequest request) {
-        Long appId = Convert.toLong(appIdStr);
-        // 参数校验
-        ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "应用ID无效");
-        ThrowUtils.throwIf(StrUtil.isBlank(message), ErrorCode.PARAMS_ERROR, "用户消息不能为空");
-        // 调用服务生成代码（流式）
-        Flux<String> contentFlux = appService.chatToGenCode(appId, message, request);
-        return contentFlux.map(
-                chunk -> {
-                    Map<String, String> wrapper = Map.of("d", chunk);
-                    String jsonData = JSONUtil.toJsonStr(wrapper);
-                    return ServerSentEvent.<String>builder()
-                            .data(jsonData)
-                            .build();
-                }).concatWith(Mono.just(
-                        ServerSentEvent.<String>builder()
-                                .event("[DONE]")
-                                .data("")
-                                .build()
-        ));
+        try {
+            Long appId = Convert.toLong(appIdStr);
+            // 参数校验
+            ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "应用ID无效");
+            ThrowUtils.throwIf(StrUtil.isBlank(message), ErrorCode.PARAMS_ERROR, "用户消息不能为空");
+            // 调用服务生成代码（流式）
+            Flux<String> contentFlux = appService.chatToGenCode(appId, message, request);
+            return contentFlux.map(
+                    chunk -> {
+                        Map<String, String> wrapper = Map.of("d", chunk);
+                        String jsonData = JSONUtil.toJsonStr(wrapper);
+                        return ServerSentEvent.<String>builder()
+                                .data(jsonData)
+                                .build();
+                    }).concatWith(Mono.just(
+                            ServerSentEvent.<String>builder()
+                                    .event("[DONE]")
+                                    .data("")
+                                    .build()
+                    )).onErrorResume(e -> {
+                        Map<String, String> errorWrapper = Map.of(
+                                "event", "error",
+                                "message", StrUtil.blankToDefault(e.getMessage(), "系统错误")
+                        );
+                        String errorJson = JSONUtil.toJsonStr(errorWrapper);
+                        return Flux.just(
+                                ServerSentEvent.<String>builder()
+                                        .event("error")
+                                        .data(errorJson)
+                                        .build(),
+                                ServerSentEvent.<String>builder()
+                                        .event("[DONE]")
+                                        .data("")
+                                        .build()
+                        );
+                    });
+        } catch (Exception e) {
+            Map<String, String> errorWrapper = Map.of(
+                    "event", "error",
+                    "message", StrUtil.blankToDefault(e.getMessage(), "系统错误")
+            );
+            String errorJson = JSONUtil.toJsonStr(errorWrapper);
+            return Flux.just(
+                    ServerSentEvent.<String>builder()
+                            .event("error")
+                            .data(errorJson)
+                            .build(),
+                    ServerSentEvent.<String>builder()
+                            .event("[DONE]")
+                            .data("")
+                            .build()
+            );
+        }
     }
 
 

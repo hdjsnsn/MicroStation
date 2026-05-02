@@ -1,7 +1,9 @@
 package org.example.aicodemother.core;
 
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.example.aicodemother.ai.AiCodeGeneratorService;
+import org.example.aicodemother.ai.AiCodeGeneratorServiceFactory;
 import org.example.aicodemother.ai.model.HtmlCodeResult;
 import org.example.aicodemother.ai.model.MultiFileCodeResult;
 import org.example.aicodemother.core.parser.CodeParserExecutor;
@@ -9,7 +11,6 @@ import org.example.aicodemother.core.saver.CodeFileSaverExecutor;
 import org.example.aicodemother.exception.BusinessException;
 import org.example.aicodemother.exception.ErrorCode;
 import org.example.aicodemother.model.enums.CodeGenTypeEnum;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -22,8 +23,8 @@ import java.io.File;
 @Slf4j
 public class AiCodeGeneratorFacade {
 
-    @Autowired
-    private AiCodeGeneratorService aiCodeGeneratorService;
+    @Resource
+    private AiCodeGeneratorServiceFactory aiCodeGeneratorServiceFactory;
 
     /**
      * 统一入口: 根据生成类型生成代码并保存
@@ -37,6 +38,7 @@ public class AiCodeGeneratorFacade {
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "生成类型为空");
         }
+        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appID);
         return switch (codeGenTypeEnum) {
             // 生成HTML模式的代码并保存
             case HTML -> {
@@ -67,6 +69,7 @@ public class AiCodeGeneratorFacade {
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "生成类型为空");
         }
+        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appID);
         return switch (codeGenTypeEnum) {
             // 生成HTML模式的代码并保存(流式)
             case HTML -> {

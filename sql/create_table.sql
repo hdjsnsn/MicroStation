@@ -45,8 +45,8 @@ create table if not exists app
 -- 对话历史表
 create table if not exists chat_history
 (
-    id          bigint auto_increment comment 'id' primary key,
-    parentId   bigint  null comment '父消息id（用于上下文关联）',
+    id          bigint                             not null comment 'id' primary key,
+    parentId    bigint                             null comment '父消息id（用于上下文关联）',
     message     text                               not null comment '消息',
     messageType varchar(32)                        not null comment 'user/ai',
     appId       bigint                             not null comment '应用id',

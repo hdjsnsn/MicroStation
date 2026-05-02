@@ -10,6 +10,7 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.util.UpdateEntity;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.example.aicodemother.common.DeleteRequest;
 import org.example.aicodemother.constant.AppConstant;
 import org.example.aicodemother.constant.UserConstant;
@@ -23,11 +24,13 @@ import org.example.aicodemother.model.dto.app.AppAdminUpdateRequest;
 import org.example.aicodemother.model.dto.app.AppQueryRequest;
 import org.example.aicodemother.model.dto.app.AppUpdateRequest;
 import org.example.aicodemother.model.entity.AppEntity;
+import org.example.aicodemother.model.entity.ChatHistoryEntity;
 import org.example.aicodemother.model.entity.UserEntity;
 import org.example.aicodemother.model.enums.CodeGenTypeEnum;
 import org.example.aicodemother.model.vo.app.AppVO;
 import org.example.aicodemother.model.vo.user.UserVO;
 import org.example.aicodemother.service.AppService;
+import org.example.aicodemother.service.ChatHistoryService;
 import org.example.aicodemother.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,6 +46,7 @@ import static org.example.aicodemother.constant.UserConstant.USER_LOGIN_STATE;
 /**
  * 应用 服务层实现。
  */
+@Slf4j
 @Service
 public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements AppService {
 
@@ -54,6 +58,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements
 
     @Autowired
     private AiCodeGeneratorFacade aiCodeGeneratorFacade;
+
+    @Autowired
+    private ChatHistoryService chatHistoryService;
 
     @Override
     public Long addApp(AppAddRequest appAddRequest, HttpServletRequest request) {
@@ -148,6 +155,11 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements
         updateApp.setIsDelete(1);
         int i = appMapper.updateByQuery(updateApp, queryWrapper);
         ThrowUtils.throwIf(i <= 0, ErrorCode.OPERATION_ERROR);
+        try {
+            chatHistoryService.deleteChatHistoryByAppId(deleteRequest.getId());
+        } catch (Exception e) {
+            log.error("用户删除应用关联的对话历史消息失败: {}", e.getMessage());
+        }
 
         return true;
     }
@@ -206,6 +218,11 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements
         updateApp.setIsDelete(1);
         int i = appMapper.updateByQuery(updateApp, queryWrapper);
         ThrowUtils.throwIf(i <= 0, ErrorCode.OPERATION_ERROR);
+        try {
+            chatHistoryService.deleteChatHistoryByAppId(deleteRequest.getId());
+        } catch (Exception e) {
+            log.error("管理员删除应用关联的对话历史消息失败: {}", e.getMessage());
+        }
 
         return true;
     }
@@ -275,8 +292,16 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "不支持的代码生成类型");
         }
-        // 5. 调用 AI 生成代码
-        return aiCodeGeneratorFacade.generateAndSaveAiCodeStream(message, codeGenTypeEnum, appId);
+        // 5. 先保存用户消息，再保存 AI 回复或错误信息
+        ChatHistoryEntity userChatHistory = chatHistoryService.addUserMessage(appId, loginUser.getId(), message);
+        StringBuilder aiMessageBuilder = new StringBuilder();
+        return aiCodeGeneratorFacade.generateAndSaveAiCodeStream(message, codeGenTypeEnum, appId)
+                .doOnNext(aiMessageBuilder::append)
+                .doOnComplete(() -> {
+                    String aiMessage = StrUtil.blankToDefault(aiMessageBuilder.toString(), "AI 未返回内容");
+                    chatHistoryService.addAiMessage(appId, loginUser.getId(), userChatHistory.getId(), aiMessage);
+                })
+                .doOnError(e -> chatHistoryService.addAiErrorMessage(appId, loginUser.getId(), userChatHistory.getId(), e.getMessage()));
     }
 
     @Override
