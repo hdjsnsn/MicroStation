@@ -9,24 +9,19 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 应用更新请求（用户）
+ * 应用部署请求
  */
 @Data
-public class AppUpdateRequest implements Serializable {
+public class AppDeployRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * id
+     * 应用ID
      */
     @Schema(type = "string")
     @JsonDeserialize(using = ToLongDeserializer.class)
-    private Long id;
-
-    /**
-     * 应用名称
-     */
-    private String appName;
+    private Long Appid;
 
 }

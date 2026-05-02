@@ -1,8 +1,8 @@
 package org.example.aicodemother.core.saver;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import org.example.aicodemother.constant.AppConstant;
 import org.example.aicodemother.exception.BusinessException;
 import org.example.aicodemother.exception.ErrorCode;
 import org.example.aicodemother.model.enums.CodeGenTypeEnum;
@@ -12,22 +12,17 @@ import java.io.File;
 public abstract class CodeFileSaverTemplate<T> {
 
     /**
-     * 文件保存的目录
-     */
-    private final static String FILE_SAVE_ROOT_DIR = System.getProperty("user.dir") + "/tmp/code_output";
-
-
-    /**
      * 模板方法：保存代码的标准流程
      *
+     * @param appID 应用ID
      * @param result 代码结果对象
      * @return 保存的目录
      */
-    public final File saveCode(T result) {
+    public final File saveCode(T result, Long appID) {
         // 1.验证输入
         validateInput(result);
         // 2. 构建唯一目录
-        String baseDirPath = buildUniqueDir();
+        String baseDirPath = buildUniqueDir(appID);
         // 3. 保存文件(具体实现由子类提供)
         saveFiles(result, baseDirPath);
         // 4。 返回文件目录对象
@@ -45,11 +40,16 @@ public abstract class CodeFileSaverTemplate<T> {
 
     /**
      * 构建文件的唯一路径： tmp/code_output/bizType_雪花ID
+     *
+     * @param appID 应用ID
      * @return 目录路径
      */
-    private String buildUniqueDir(){
+    private String buildUniqueDir(Long appID){
+        if (appID == null){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "应用ID不能为空");
+        }
         String codeType = getCodeType().getValue();
-        String uniqueDir = FILE_SAVE_ROOT_DIR + File.separator + codeType + '_' + IdUtil.getSnowflakeNextIdStr();
+        String uniqueDir = AppConstant.CODE_OUTPUT_ROOT_DIR + File.separator + codeType + '_' + appID;
         FileUtil.mkdir(uniqueDir);
         return uniqueDir;
     }

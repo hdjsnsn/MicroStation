@@ -1,7 +1,10 @@
 package org.example.aicodemother.model.dto.user;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.example.aicodemother.Utils.ToLongDeserializer;
 import org.example.aicodemother.common.PageRequest;
 
 import java.io.Serial;
@@ -17,6 +20,8 @@ public class UserQueryRequest extends PageRequest implements Serializable {
     /**
      * id
      */
+    @Schema(type = "string")
+    @JsonDeserialize(using = ToLongDeserializer.class)
     private Long id;
 
     /**

@@ -1,5 +1,6 @@
 package org.example.aicodemother.controller;
 
+import cn.hutool.core.convert.Convert;
 import com.mybatisflex.core.paginate.Page;
 import jakarta.servlet.http.HttpServletRequest;
 import org.example.aicodemother.annotation.AuthCheck;
@@ -42,7 +43,9 @@ public class UserController {
      */
     @GetMapping("/getByID")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<UserEntity> getUserById(Long id) {
+    public BaseResponse<UserEntity> getUserById(String idStr) {
+        Long id = Convert.toLong(idStr);
+        ThrowUtils.throwIf(id == null, ErrorCode.PARAMS_ERROR);
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
         UserEntity userEntity = userService.getUserById(id);
         return ResultUtils.success(userEntity);
@@ -52,7 +55,9 @@ public class UserController {
      * 根据 id 获取包装类(普通用户)
      */
     @GetMapping("/getByID/vo")
-    public BaseResponse<UserVO> getUserVOById(Long id) {
+    public BaseResponse<UserVO> getUserVOById(String idStr) {
+        Long id = Convert.toLong(idStr);
+        ThrowUtils.throwIf(id == null, ErrorCode.PARAMS_ERROR);
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
         UserVO userVO = userService.getUserVOById(id);
         return ResultUtils.success(userVO);
@@ -64,6 +69,7 @@ public class UserController {
     @PostMapping("/delete")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> deleteUser(@RequestBody DeleteRequest deleteRequest, HttpServletRequest httpServletRequest) {
+
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }

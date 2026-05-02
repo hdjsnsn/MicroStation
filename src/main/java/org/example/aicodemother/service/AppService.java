@@ -10,6 +10,7 @@ import org.example.aicodemother.model.dto.app.AppQueryRequest;
 import org.example.aicodemother.model.dto.app.AppUpdateRequest;
 import org.example.aicodemother.model.entity.AppEntity;
 import org.example.aicodemother.model.vo.app.AppVO;
+import reactor.core.publisher.Flux;
 
 /**
  * 应用 服务层。
@@ -65,5 +66,22 @@ public interface AppService extends IService<AppEntity> {
      * 管理员分页查询应用列表
      */
     Page<AppVO> adminListAppVOByPage(AppQueryRequest appQueryRequest);
+
+    /**
+     * 对话生成应用流式代码
+     * @param appID 应用ID
+     * @param userMessage 提示词
+     * @return 流式响应
+     */
+    Flux<String> chatToGenCode(Long appID, String userMessage, HttpServletRequest request);
+
+    /**
+     *  应用部署
+     */
+    String deployApp(Long appID, HttpServletRequest request);
+
+    /**
+     * 从 session 获取当前登录用户
+     */
 
 }

@@ -1,6 +1,9 @@
 package org.example.aicodemother.model.dto.app;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.example.aicodemother.Utils.ToLongDeserializer;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -17,6 +20,8 @@ public class AppAdminUpdateRequest implements Serializable {
     /**
      * id
      */
+    @Schema(type = "string")
+    @JsonDeserialize(using = ToLongDeserializer.class)
     private Long id;
 
     /**
