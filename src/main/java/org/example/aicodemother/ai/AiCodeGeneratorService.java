@@ -2,6 +2,7 @@ package org.example.aicodemother.ai;
 
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.TokenStream;
 import dev.langchain4j.service.UserMessage;
 import org.example.aicodemother.ai.model.HtmlCodeResult;
 import org.example.aicodemother.ai.model.MultiFileCodeResult;
@@ -52,5 +53,5 @@ public interface AiCodeGeneratorService {
      * @return AI的输出结果流
      */
     @SystemMessage(fromResource = "prompt/codegen-vue-system-prompt.md")
-    Flux<String> generateVueCodeStream(@UserMessage String userMessage, @MemoryId Long appId);
+    TokenStream generateVueCodeStream(@UserMessage String userMessage, @MemoryId Long appId);
 }

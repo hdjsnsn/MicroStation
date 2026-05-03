@@ -1,5 +1,6 @@
 package org.example.aicodemother.controller;
 
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.example.aicodemother.common.BaseResponse;
 import org.example.aicodemother.common.ResultUtils;
@@ -10,7 +11,6 @@ import org.example.aicodemother.model.dto.login.UserRegisterRequest;
 import org.example.aicodemother.model.entity.UserEntity;
 import org.example.aicodemother.model.vo.login.LoginUserVO;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.example.aicodemother.service.LoginService;
 
 /**
@@ -22,7 +22,7 @@ import org.example.aicodemother.service.LoginService;
 @RequestMapping("/login")
 public class LoginController {
 
-    @Autowired
+    @Resource
     private LoginService loginService;
 
     /**
@@ -66,7 +66,6 @@ public class LoginController {
      * 用户注销
      *
      * @param request 请求对象
-     * @return
      */
     @PostMapping("/logout")
     public BaseResponse<Boolean> Logout(HttpServletRequest request) {

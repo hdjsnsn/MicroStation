@@ -44,6 +44,7 @@ knife4j:
   setting:
     language: zh_cn
 
+# 代码生成后部署的服务器地址
 code:
   deploy-host: http://localhost
 

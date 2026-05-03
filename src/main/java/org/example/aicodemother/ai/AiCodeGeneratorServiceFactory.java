@@ -49,17 +49,8 @@ public class AiCodeGeneratorServiceFactory {
             .maximumSize(1000)
             .expireAfterWrite(Duration.ofMinutes(30))
             .expireAfterAccess(Duration.ofMinutes(10))
-            .removalListener((key, value, cause) -> {
-                log.debug("AI 服务实例被移除，cacheKey : {}, 原因: {}", key, cause);
-            })
+            .removalListener((key, value, cause) -> log.debug("AI 服务实例被移除，cacheKey : {}, 原因: {}", key, cause))
             .build();
-
-    /**
-     * 根据 appId 获取服务（带缓存）
-     */
-    public AiCodeGeneratorService getAiCodeGeneratorService(long appId) {
-        return getAiCodeGeneratorService(appId, CodeGenTypeEnum.HTML);
-    }
 
     /**
      * 根据 cacheKey 获取服务（带缓存）

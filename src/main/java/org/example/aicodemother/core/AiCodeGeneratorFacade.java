@@ -1,11 +1,18 @@
 package org.example.aicodemother.core;
 
+import cn.hutool.json.JSONUtil;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.service.TokenStream;
+import dev.langchain4j.service.tool.ToolExecution;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.example.aicodemother.ai.AiCodeGeneratorService;
 import org.example.aicodemother.ai.AiCodeGeneratorServiceFactory;
 import org.example.aicodemother.ai.model.HtmlCodeResult;
 import org.example.aicodemother.ai.model.MultiFileCodeResult;
+import org.example.aicodemother.ai.model.message.AiResponseMessage;
+import org.example.aicodemother.ai.model.message.ToolExecutedMessage;
+import org.example.aicodemother.ai.model.message.ToolRequestMessage;
 import org.example.aicodemother.core.parser.CodeParserExecutor;
 import org.example.aicodemother.core.saver.CodeFileSaverExecutor;
 import org.example.aicodemother.exception.BusinessException;
@@ -82,8 +89,8 @@ public class AiCodeGeneratorFacade {
                 yield processCodeStream(codeStream, CodeGenTypeEnum.MULTI_FILE, appID);
             }
             case VUE -> {
-                Flux<String> codeStream = aiCodeGeneratorService.generateVueCodeStream(userMessage, appID);
-                yield processCodeStream(codeStream, CodeGenTypeEnum.MULTI_FILE, appID);
+                TokenStream codeStream = aiCodeGeneratorService.generateVueCodeStream(userMessage, appID);
+                yield processTokenStream(codeStream);
             }
             default -> {
                 String errorMessage = "不支持生成类型" + codeGenTypeEnum.getValue();
@@ -91,6 +98,38 @@ public class AiCodeGeneratorFacade {
             }
         };
     }
+
+    /**
+     * 将 TokenStream 转换为 Flux<String>，并传递工具调用信息
+     *
+     * @param tokenStream TokenStream 对象
+     * @return Flux<String> 流式响应
+     */
+    private Flux<String> processTokenStream(TokenStream tokenStream) {
+        return Flux.create(sink -> {
+            tokenStream.onPartialResponse((String partialResponse) -> {
+                        AiResponseMessage aiResponseMessage = new AiResponseMessage(partialResponse);
+                        sink.next(JSONUtil.toJsonStr(aiResponseMessage));
+                    })
+                    .onPartialToolExecutionRequest((index, toolExecutionRequest) -> {
+                        ToolRequestMessage toolRequestMessage = new ToolRequestMessage(toolExecutionRequest);
+                        sink.next(JSONUtil.toJsonStr(toolRequestMessage));
+                    })
+                    .onToolExecuted((ToolExecution toolExecution) -> {
+                        ToolExecutedMessage toolExecutedMessage = new ToolExecutedMessage(toolExecution);
+                        sink.next(JSONUtil.toJsonStr(toolExecutedMessage));
+                    })
+                    .onCompleteResponse((ChatResponse response) -> {
+                        sink.complete();
+                    })
+                    .onError((Throwable error) -> {
+                        error.fillInStackTrace();
+                        sink.error(error);
+                    })
+                    .start();
+        });
+    }
+
 
     /**
      * 通用流式代码处理方法

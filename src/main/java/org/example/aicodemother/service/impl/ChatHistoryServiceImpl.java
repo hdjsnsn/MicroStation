@@ -10,6 +10,7 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.example.aicodemother.constant.UserConstant;
@@ -44,10 +45,10 @@ import static org.example.aicodemother.constant.UserConstant.USER_LOGIN_STATE;
 @Service
 public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatHistoryEntity> implements ChatHistoryService {
 
-    @Autowired
+    @Resource
     private ChatHistoryMapper chatHistoryMapper;
 
-    @Autowired
+    @Resource
     @Lazy
     private AppService appService;
 

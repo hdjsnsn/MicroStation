@@ -4,6 +4,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.mybatisflex.core.paginate.Page;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.example.aicodemother.annotation.AuthCheck;
 import org.example.aicodemother.common.BaseResponse;
@@ -16,7 +17,6 @@ import org.example.aicodemother.model.dto.app.*;
 import org.example.aicodemother.model.entity.AppEntity;
 import org.example.aicodemother.model.vo.app.AppVO;
 import org.example.aicodemother.service.AppService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +32,7 @@ import java.util.Map;
 @RequestMapping("/app")
 public class AppController {
 
-    @Autowired
+    @Resource
     private AppService appService;
 
     /**

@@ -9,12 +9,14 @@ import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.util.UpdateEntity;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.example.aicodemother.common.DeleteRequest;
 import org.example.aicodemother.constant.AppConstant;
 import org.example.aicodemother.constant.UserConstant;
 import org.example.aicodemother.core.AiCodeGeneratorFacade;
+import org.example.aicodemother.core.handler.StreamHandlerExecutor;
 import org.example.aicodemother.exception.BusinessException;
 import org.example.aicodemother.exception.ErrorCode;
 import org.example.aicodemother.exception.ThrowUtils;
@@ -32,7 +34,6 @@ import org.example.aicodemother.model.vo.user.UserVO;
 import org.example.aicodemother.service.AppService;
 import org.example.aicodemother.service.ChatHistoryService;
 import org.example.aicodemother.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -51,17 +52,20 @@ import static org.example.aicodemother.constant.UserConstant.USER_LOGIN_STATE;
 @Service
 public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements AppService {
 
-    @Autowired
+    @Resource
     private AppMapper appMapper;
 
-    @Autowired
+    @Resource
     private UserService userService;
 
-    @Autowired
+    @Resource
+    private ChatHistoryService chatHistoryService;
+
+    @Resource
     private AiCodeGeneratorFacade aiCodeGeneratorFacade;
 
-    @Autowired
-    private ChatHistoryService chatHistoryService;
+    @Resource
+    private StreamHandlerExecutor streamHandlerExecutor;
 
     @Value("${code.deploy-host:http://localhost}")
     private String deployHost;
@@ -84,7 +88,8 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements
         AppEntity app = new AppEntity();
         app.setAppName(appName);
         app.setInitPrompt(initPrompt);
-        app.setCodeGenType(CodeGenTypeEnum.MULTI_FILE.getValue());
+        // 暂时使用Vue工程生成
+        app.setCodeGenType(CodeGenTypeEnum.VUE.getValue());
         app.setUserId(loginUser.getId());
 
         boolean result = this.save(app);
@@ -215,9 +220,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements
         ThrowUtils.throwIf(deleteRequest == null || deleteRequest.getId() <= 0, ErrorCode.PARAMS_ERROR);
 
         // 逻辑删除
-        QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.eq("id", deleteRequest.getId());
-        queryWrapper.eq("isDelete", 0);
+        QueryWrapper queryWrapper = new QueryWrapper().eq("id", deleteRequest.getId()).eq("isDelete", 0);
 
         AppEntity updateApp = UpdateEntity.of(AppEntity.class);
         updateApp.setIsDelete(1);
@@ -299,14 +302,8 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppEntity> implements
         }
         // 5. 先保存用户消息，再保存 AI 回复或错误信息
         ChatHistoryEntity userChatHistory = chatHistoryService.addUserMessage(appId, loginUser.getId(), message);
-        StringBuilder aiMessageBuilder = new StringBuilder();
-        return aiCodeGeneratorFacade.generateAndSaveAiCodeStream(message, codeGenTypeEnum, appId)
-                .doOnNext(aiMessageBuilder::append)
-                .doOnComplete(() -> {
-                    String aiMessage = StrUtil.blankToDefault(aiMessageBuilder.toString(), "AI 未返回内容");
-                    chatHistoryService.addAiMessage(appId, loginUser.getId(), userChatHistory.getId(), aiMessage);
-                })
-                .doOnError(e -> chatHistoryService.addAiErrorMessage(appId, loginUser.getId(), userChatHistory.getId(), e.getMessage()));
+        Flux<String> contentFlux = aiCodeGeneratorFacade .generateAndSaveAiCodeStream(message, codeGenTypeEnum, appId);
+        return streamHandlerExecutor.doExecute(contentFlux, chatHistoryService, userChatHistory.getId(), appId, loginUser, codeGenTypeEnum);
     }
 
     @Override

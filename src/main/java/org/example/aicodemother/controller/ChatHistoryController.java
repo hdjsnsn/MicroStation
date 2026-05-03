@@ -2,6 +2,7 @@ package org.example.aicodemother.controller;
 
 import cn.hutool.core.convert.Convert;
 import com.mybatisflex.core.paginate.Page;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.example.aicodemother.annotation.AuthCheck;
 import org.example.aicodemother.common.BaseResponse;
@@ -12,7 +13,6 @@ import org.example.aicodemother.exception.ThrowUtils;
 import org.example.aicodemother.model.dto.chatHistory.ChatHistoryQueryRequest;
 import org.example.aicodemother.model.vo.chatHistory.ChatHistoryVO;
 import org.example.aicodemother.service.ChatHistoryService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 @RequestMapping("/chatHistory")
 public class ChatHistoryController {
 
-    @Autowired
+    @Resource
     private ChatHistoryService chatHistoryService;
 
     /**

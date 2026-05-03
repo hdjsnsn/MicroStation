@@ -2,6 +2,7 @@ package org.example.aicodemother.controller;
 
 import cn.hutool.core.convert.Convert;
 import com.mybatisflex.core.paginate.Page;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.example.aicodemother.annotation.AuthCheck;
 import org.example.aicodemother.common.BaseResponse;
@@ -17,14 +18,13 @@ import org.example.aicodemother.model.dto.user.UserUpdateRequest;
 import org.example.aicodemother.model.entity.UserEntity;
 import org.example.aicodemother.model.vo.user.UserVO;
 import org.example.aicodemother.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
 
-    @Autowired
+    @Resource
     private UserService userService;
 
     /**
