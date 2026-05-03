@@ -38,7 +38,7 @@ public class AiCodeGeneratorFacade {
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "生成类型为空");
         }
-        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appID);
+        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appID, codeGenTypeEnum);
         return switch (codeGenTypeEnum) {
             // 生成HTML模式的代码并保存
             case HTML -> {
@@ -69,7 +69,7 @@ public class AiCodeGeneratorFacade {
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "生成类型为空");
         }
-        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appID);
+        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appID, codeGenTypeEnum);
         return switch (codeGenTypeEnum) {
             // 生成HTML模式的代码并保存(流式)
             case HTML -> {
@@ -79,6 +79,10 @@ public class AiCodeGeneratorFacade {
             // 生成多文件模式的代码并保存(流式)
             case MULTI_FILE -> {
                 Flux<String> codeStream = aiCodeGeneratorService.generateMultiFileCodeStream(userMessage);
+                yield processCodeStream(codeStream, CodeGenTypeEnum.MULTI_FILE, appID);
+            }
+            case VUE -> {
+                Flux<String> codeStream = aiCodeGeneratorService.generateVueCodeStream(userMessage, appID);
                 yield processCodeStream(codeStream, CodeGenTypeEnum.MULTI_FILE, appID);
             }
             default -> {

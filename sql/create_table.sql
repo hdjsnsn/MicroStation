@@ -1,11 +1,11 @@
 -- 创建库
-create database if not exists yu_ai_code_mother;
+create database if not exists ai_code_mother;
 
 -- 切换库
-use yu_ai_code_mother;
+use ai_code_mother;
 
 -- 用户表
-create table if not exists userEntity
+create table if not exists user
 (
     id           bigint auto_increment comment 'id' primary key,
     userAccount  varchar(256)                           not null comment '账号',
@@ -13,7 +13,7 @@ create table if not exists userEntity
     userName     varchar(256)                           null comment '用户昵称',
     userAvatar   varchar(1024)                          null comment '用户头像',
     userProfile  varchar(512)                           null comment '用户简介',
-    userRole     varchar(256) default 'userEntity'            not null comment '用户角色：userEntity/admin',
+    userRole     varchar(256) default 'user'            not null comment '用户角色：user/admin',
     editTime     datetime     default CURRENT_TIMESTAMP not null comment '编辑时间',
     createTime   datetime     default CURRENT_TIMESTAMP not null comment '创建时间',
     updateTime   datetime     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
